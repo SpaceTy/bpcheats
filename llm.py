@@ -40,7 +40,8 @@ def ask_llm(system_prompt="", user_message="", model="openai/gpt-5"):
     # Make the API call
     completion = client.chat.completions.create(
         model=model,
-        messages=messages
+        messages=messages,
+        max_tokens=2056
     )
 
     # Return the response content
