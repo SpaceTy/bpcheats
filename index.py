@@ -108,6 +108,12 @@ def create_docx_report(original_instructions, commands, image_paths):
         commands (list): List of executed commands
         image_paths (list): List of paths to output images
     """
+    # Ensure output directory exists
+    output_dir = "output"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"Created output directory: {output_dir}")
+
     # Create a new document
     doc = Document()
 
@@ -129,7 +135,6 @@ def create_docx_report(original_instructions, commands, image_paths):
         # Add command description
         doc.add_paragraph(generate_command_description(command))
 
-
         # Add image if it exists
         if os.path.exists(image_path):
             try:
@@ -141,12 +146,20 @@ def create_docx_report(original_instructions, commands, image_paths):
 
         doc.add_paragraph()  # Add spacing
 
-
-
     # Save the document
-    output_path = "output/command_execution_report.docx"
-    doc.save(output_path)
-    print(f"DOCX report saved to: {output_path}")
+    output_path = os.path.join(output_dir, "command_execution_report.docx")
+    try:
+        doc.save(output_path)
+        print(f"DOCX report saved to: {output_path}")
+    except Exception as e:
+        print(f"Error saving DOCX report: {e}")
+        # Try saving to current directory as fallback
+        fallback_path = "command_execution_report.docx"
+        try:
+            doc.save(fallback_path)
+            print(f"DOCX report saved to fallback location: {fallback_path}")
+        except Exception as e2:
+            print(f"Error saving DOCX report to fallback location: {e2}")
 
 
 def generate_command_description(command):
