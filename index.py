@@ -53,14 +53,19 @@ def main():
 
     try:
         commands_response = ask_llm(system_prompt, user_message)
-        commands = [cmd.strip() for cmd in commands_response.strip().split('\n') if cmd.strip()]
-        print(f"Generated {len(commands)} commands.")
-        print("Commands to execute:")
-        for i, cmd in enumerate(commands, 1):
-            print(f"  {i}. {cmd}")
+        if isinstance(commands_response, str):
+            commands = [cmd.strip() for cmd in commands_response.strip().split('\n') if cmd.strip()]
+            print(f"Generated {len(commands)} commands.")
+            print("Commands to execute:")
+            for i, cmd in enumerate(commands, 1):
+                print(f"  {i}. {cmd}")
+        else:
+            print("No valid response from LLM.")
+            return
     except Exception as e:
         print(f"Error generating commands with LLM: {e}")
         return
+
 
     # Step 3: Execute commands and generate output images
     print("Step 3: Executing commands and generating output images...")

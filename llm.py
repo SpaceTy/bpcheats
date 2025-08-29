@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-def ask_llm(system_prompt="", user_message="", model="openai/gpt-5"):
+def ask_llm(system_prompt="", user_message="", model="z-ai/glm-4.5"):
     """
     Ask an LLM a question using the OpenRouter API.
 
     Args:
         system_prompt (str): The system prompt to guide the LLM's behavior
         user_message (str): The user's message/question
-        model (str): The model to use. Defaults to "moonshotai/kimi-k2"
+        model (str): The model to use. Defaults to "z-ai/glm-4.5"
 
     Returns:
         str: The LLM's response content
