@@ -5,6 +5,8 @@ from llm import ask_llm
 from terminal_emulator import run_command_and_capture_output
 from docx import Document
 from docx.shared import Inches
+import concurrent.futures
+from functools import partial
 
 
 def main():
@@ -104,6 +106,39 @@ def main():
     print("Process completed!")
 
 
+def generate_command_descriptions_parallel(commands, max_workers=5):
+    """
+    Generate descriptions for multiple commands in parallel.
+
+    Args:
+        commands (list): List of commands to describe
+        max_workers (int): Maximum number of parallel workers
+
+    Returns:
+        list: List of descriptions corresponding to the input commands
+    """
+    descriptions = []
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        # Submit all tasks
+        future_to_index = {
+            executor.submit(generate_command_description, command): i 
+            for i, command in enumerate(commands)
+        }
+        
+        # Collect results in order
+        results = [None] * len(commands)
+        for future in concurrent.futures.as_completed(future_to_index):
+            index = future_to_index[future]
+            try:
+                results[index] = future.result()
+            except Exception as e:
+                print(f"Error generating description for command at index {index}: {e}")
+                results[index] = "This command was executed in the field directory to perform the required task."
+    
+    return results
+
+
 def create_docx_report(original_instructions, commands, image_paths):
     """
     Create a DOCX report with commands and their output images.
@@ -132,13 +167,18 @@ def create_docx_report(original_instructions, commands, image_paths):
     # Add command execution section
     doc.add_heading('Command Execution Results', 1)
 
+    # Generate all descriptions in parallel
+    print("Generating command descriptions in parallel...")
+    descriptions = generate_command_descriptions_parallel(commands)
+    print("Command descriptions generated successfully.")
+
     # Add each command with its image
-    for i, (command, image_path) in enumerate(zip(commands, image_paths)):
+    for i, (command, image_path, description) in enumerate(zip(commands, image_paths, descriptions)):
         # Add command heading
         doc.add_heading(f'Command {i+1}: {command}', 2)
 
         # Add command description
-        doc.add_paragraph(generate_command_description(command))
+        doc.add_paragraph(description)
 
         # Add image if it exists
         if os.path.exists(image_path):
